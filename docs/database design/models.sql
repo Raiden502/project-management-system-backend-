@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS  user_info (
     address VARCHAR(500),
     verified BOOLEAN DEFAULT FALSE NOT NULL,
     role roles NOT NULL,
-    avatar VARCHAR(255),
+    avatar TEXT,
     chat_socket_id VARCHAR(255) UNIQUE,
     video_socket_id VARCHAR(255) UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS  group_info (
     created_by VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    avatar VARCHAR(255),
+    avatar TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP,
     CONSTRAINT group_organization_fk FOREIGN KEY (organization_id) REFERENCES organization (organization_id),
@@ -106,6 +106,8 @@ CREATE TABLE IF NOT EXISTS  department_info (
     user_id VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
+    avatar TEXT,
+    associate_user VARCHAR(255),
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     last_modified TIMESTAMP,
     project_count BIGINT DEFAULT 0,
@@ -113,7 +115,8 @@ CREATE TABLE IF NOT EXISTS  department_info (
     teams_count BIGINT DEFAULT 0,
     users_count BIGINT DEFAULT 0,
     CONSTRAINT dept_organization_fk FOREIGN KEY (organization_id) REFERENCES organization (organization_id),
-    CONSTRAINT dept_creator_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id)
+    CONSTRAINT dept_creator_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id),
+    CONSTRAINT dept_associate_fk FOREIGN KEY (associate_user) REFERENCES user_info (user_id)
 );
 
 
@@ -251,6 +254,3 @@ CREATE TABLE IF NOT EXISTS  comments (
     CONSTRAINT comments_project_fk FOREIGN KEY (project_id) REFERENCES projects_info (project_id),
     CONSTRAINT comments_user_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id)
 );
-
-
-

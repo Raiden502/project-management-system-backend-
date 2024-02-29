@@ -3,9 +3,9 @@ from flask_cors import CORS
 from myapp.db import init_app
 from myapp import settings
 from models.load_models import load_db
-from blueprints.auth.auth_blueprint import auth_blueprint
-from blueprints.users.user_blueprint import user_blueprint
-from blueprints.departments.dept_blueprint import dept_blueprint
+from blueprints.auth_blueprint import auth_blueprint
+from blueprints.user_blueprint import user_blueprint
+from blueprints.dept_blueprint import dept_blueprint
 
 
 def create_app():
