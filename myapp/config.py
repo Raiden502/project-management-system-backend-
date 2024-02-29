@@ -16,5 +16,9 @@ def get_env_variable(name):
 
 @dataclass
 class ApplicationConfig(object):
-    DB_TRACK_MODIFICATIONS = get_env_variable("DB_TRACK_MODIFICATIONS")
-    DATABASE_URI: str = get_env_variable('DB_URI')
+    DB_TRACK_MODIFICATIONS = False
+    DATABASE_URI: str = 'postgresql://postgres:sujanix#123@localhost:5432/collab-pre-1'
+
+@dataclass
+class JWtConfig(object):
+    SECRET_KEY = get_env_variable(name='JWT_SECRET')
