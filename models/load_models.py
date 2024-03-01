@@ -136,6 +136,10 @@ def load_db():
             department_id VARCHAR(255) NOT NULL,
             user_id VARCHAR(255) NOT NULL,
             name VARCHAR(255) NOT NULL,
+            avatar TEXT,
+            status project_status NOT NULL,
+            tools TEXT [],
+            links TEXT [],
             description TEXT,
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
             last_modified TIMESTAMP,
@@ -156,7 +160,7 @@ def load_db():
             created_by VARCHAR(255) NOT NULL,
             name VARCHAR(255) NOT NULL,
             description TEXT,
-            avatar VARCHAR(255),
+            avatar TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
             updated_at TIMESTAMP,
             user_count BIGINT DEFAULT 0,
@@ -268,49 +272,6 @@ def load_db():
             CONSTRAINT comments_user_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id)
         );
         
-        DO $$ 
-        BEGIN
-            IF NOT EXISTS (
-                SELECT 1 
-                FROM information_schema.columns 
-                WHERE table_name = 'projects_info' AND column_name = 'avatar'
-            ) THEN
-                ALTER TABLE projects_info ADD COLUMN avatar TEXT;
-            END IF;
-
-            IF NOT EXISTS (
-                SELECT 1 
-                FROM information_schema.columns 
-                WHERE table_name = 'projects_info' AND column_name = 'status'
-            ) THEN
-                ALTER TABLE projects_info ADD COLUMN status project_status NOT NULL;
-            END IF;
-
-            IF NOT EXISTS (
-                SELECT 1 
-                FROM information_schema.columns 
-                WHERE table_name = 'projects_info' AND column_name = 'links'
-            ) THEN
-                ALTER TABLE projects_info ADD COLUMN links TEXT [];
-            END IF;
-
-            IF NOT EXISTS (
-                SELECT 1 
-                FROM information_schema.columns 
-                WHERE table_name = 'projects_info' AND column_name = 'tools'
-            ) THEN
-                ALTER TABLE projects_info ADD COLUMN tools TEXT [];
-            END IF;
-
-            IF EXISTS (
-                SELECT 1 
-                FROM information_schema.columns 
-                WHERE table_name = 'teams_info' AND column_name = 'avatar'
-            ) THEN
-                ALTER TABLE teams_info ALTER COLUMN avatar TYPE TEXT;
-            END IF;
-        END $$;
-
     '''
     with db.session() as session:
         session.execute(text(query_string))

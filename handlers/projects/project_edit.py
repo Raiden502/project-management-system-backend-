@@ -45,18 +45,20 @@ class EditProject:
             users_to_add = [user for user in self.data['users'] if user not in existing_users]
             users_to_remove = [user for user in existing_users if user not in self.data['users']]
 
+            print(users_to_remove, users_to_add)
 
             for user in users_to_add:
                 relation_id = generate_uniqueId(type=['project_user'])
                 insert_query = f'''
-                    INSERT INTO project_user_association (relation_id, user_id, project_id)
-                    VALUES (:rel_id, :user_id, :project_id)
+                    INSERT INTO project_user_association (relation_id, user_id, project_id, department_id)
+                    VALUES (:rel_id, :user_id, :project_id, :dept_id)
                 '''
             
                 db.session.execute(text(insert_query), {
                         "project_id": project_id,
                         "user_id": user,
                         "rel_id": relation_id.get('project_user'),
+                        "dept_id": self.data['department_id']
                     })
                 db.session.commit()
 
@@ -79,13 +81,14 @@ class EditProject:
             for team in teams_to_add:
                 relation_id = generate_uniqueId(type=['project_user'])
                 insert_query = f'''
-                    INSERT INTO project_user_association (relation_id, team_id, project_id)
-                    VALUES (:rel_id, :team_id, :project_id)
+                    INSERT INTO project_user_association (relation_id, team_id, project_id, department_id)
+                    VALUES (:rel_id, :team_id, :project_id, :dept_id)
                 '''
                 db.session.execute(text(insert_query), {
                         "project_id": project_id,
                         "team_id": team,
                         "rel_id": relation_id.get('project_user'),
+                        "dept_id": self.data['department_id']
                     })
                 db.session.commit()
 
