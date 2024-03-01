@@ -1,3 +1,4 @@
+
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'roles') THEN
@@ -14,6 +15,9 @@ BEGIN
     
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'file_types') THEN
         CREATE TYPE file_types as ENUM('image', 'file');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'project_status') THEN
+        CREATE TYPE project_status as ENUM('Design', 'Development', 'Testing', 'Analysis', 'Maintenance', 'Documentation', 'Iteration', 'Proto Type', 'Deployment');
     END IF;
 END
 $$;
@@ -119,17 +123,6 @@ CREATE TABLE IF NOT EXISTS  department_info (
     CONSTRAINT dept_associate_fk FOREIGN KEY (associate_user) REFERENCES user_info (user_id)
 );
 
-
-CREATE TABLE IF NOT EXISTS  dept_user_associaton (
-    relation_id VARCHAR(255) PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
-    department_id VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT dept_user_association_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id),
-    CONSTRAINT deptuser_dept_association_fk FOREIGN KEY (department_id) REFERENCES department_info (department_id)
-);
-
-
 --- Projects  ---
 
 CREATE TABLE IF NOT EXISTS  projects_info (
@@ -147,17 +140,6 @@ CREATE TABLE IF NOT EXISTS  projects_info (
     CONSTRAINT projects_organization_fk FOREIGN KEY (organization_id) REFERENCES organization (organization_id),
     CONSTRAINT projects_department_fk FOREIGN KEY (department_id) REFERENCES department_info (department_id),
     CONSTRAINT projects_creator_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id)
-);
-
-CREATE TABLE IF NOT EXISTS  project_user_association (
-    relation_id VARCHAR(255) PRIMARY KEY,
-    project_id VARCHAR(255) NOT NULL,
-    department_id VARCHAR(255) NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT project_user_association_project_fk FOREIGN KEY (project_id) REFERENCES projects_info (project_id),
-    CONSTRAINT project_user_association_department_fk FOREIGN KEY (department_id) REFERENCES department_info (department_id),
-    CONSTRAINT project_user_association_user_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id)
 );
 
 --- Teams ---
@@ -185,6 +167,30 @@ CREATE TABLE IF NOT EXISTS  team_user_associaton (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT team_user_association_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id),
     CONSTRAINT teamuser_user_association_fk FOREIGN KEY (team_id) REFERENCES teams_info (team_id)
+);
+
+CREATE TABLE IF NOT EXISTS  project_user_association (
+    relation_id VARCHAR(255) PRIMARY KEY,
+    project_id VARCHAR(255) NOT NULL,
+    department_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255),
+    team_id VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT project_user_association_project_fk FOREIGN KEY (project_id) REFERENCES projects_info (project_id),
+    CONSTRAINT project_user_association_department_fk FOREIGN KEY (department_id) REFERENCES department_info (department_id),
+    CONSTRAINT project_user_association_user_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id),
+    CONSTRAINT project_user_team_association_fk FOREIGN KEY (team_id) REFERENCES teams_info (team_id)
+);
+
+CREATE TABLE IF NOT EXISTS  dept_user_associaton (
+    relation_id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255),
+    team_id VARCHAR(255),
+    department_id VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT dept_user_association_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id),
+    CONSTRAINT deptuser_dept_association_fk FOREIGN KEY (department_id) REFERENCES department_info (department_id),
+    CONSTRAINT deptuser_team_association_fk FOREIGN KEY (team_id) REFERENCES teams_info (team_id)
 );
 
 --- Tasks ---
@@ -235,11 +241,13 @@ CREATE TABLE IF NOT EXISTS  task_user_association (
     relation_id VARCHAR(255) PRIMARY KEY,
     project_id VARCHAR(255) NOT NULL,
     task_id VARCHAR(255) NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255),
+    team_id VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT task_user_association_project_fk FOREIGN KEY (project_id) REFERENCES projects_info (project_id),
     CONSTRAINT task_user_association_task_fk FOREIGN KEY (task_id) REFERENCES tasks (task_id),
-    CONSTRAINT task_user_association_user_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id)
+    CONSTRAINT task_user_association_user_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id),
+    CONSTRAINT task_user_team_association_user_fk FOREIGN KEY (team_id) REFERENCES teams_info (team_id)
 );
 
 CREATE TABLE IF NOT EXISTS  comments (
@@ -254,3 +262,38 @@ CREATE TABLE IF NOT EXISTS  comments (
     CONSTRAINT comments_project_fk FOREIGN KEY (project_id) REFERENCES projects_info (project_id),
     CONSTRAINT comments_user_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id)
 );
+
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'projects_info' AND column_name = 'avatar'
+    ) THEN
+        ALTER TABLE projects_info ADD COLUMN avatar TEXT;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'projects_info' AND column_name = 'status'
+    ) THEN
+        ALTER TABLE projects_info ADD COLUMN status project_status NOT NULL;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'projects_info' AND column_name = 'links'
+    ) THEN
+        ALTER TABLE projects_info ADD COLUMN links TEXT [];
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'projects_info' AND column_name = 'tools'
+    ) THEN
+        ALTER TABLE projects_info ADD COLUMN tools TEXT [];
+    END IF;
+END $$;

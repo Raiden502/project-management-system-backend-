@@ -20,14 +20,17 @@ class DepartmentDetails:
                     di.task_count,
                     di.teams_count,
                     di.users_count,
-                    array_agg(json_build_object('user_id', u.user_id, 'name', u.user_name, 'avatarUrl', u.avatar, 'role', u.role)) AS userlist,
-                    di.organization_id
+                    array_agg(json_build_object('user_id', u.user_id, 'name', u.user_name, 'avatarUrl', u.avatar, 'role', u.role)) FILTER (WHERE u.user_id IS NOT NULL) AS userlist,
+                    o.name,
+                    array_agg(json_build_object('team_id', t.team_id, 'name', t.name, 'avatarUrl', t.avatar, 'desc', t.description)) FILTER (WHERE t.team_id IS NOT NULL) AS teamlist
                 FROM user_info u
                 LEFT JOIN dept_user_associaton d ON d.user_id = u.user_id
                 LEFT JOIN department_info di ON d.department_id = di.department_id
+                LEFT JOIN teams_info t ON t.team_id = d.team_id
+                LEFT JOIN organization o on o.organization_id = di.organization_id
                 WHERE di.department_id = :dept_id
                 GROUP BY di.department_id, di.name, di.description, di.created_date, di.avatar, 
-                di.project_count, di.task_count, di.teams_count,di.users_count, di.organization_id
+                di.project_count, di.task_count, di.teams_count,di.users_count, o.name
             '''    
             with db.session() as session:
                 result = session.execute(
@@ -50,8 +53,9 @@ class DepartmentDetails:
                             "task_count":data[6],
                             "teams_count":data[7],
                             "users_count":data[8],
-                            "contacts":data[9],
-                            "organization":data[10]
+                            "contacts":data[9] or [],
+                            "organization":data[10],
+                            "teams":data[11] or []
                         }
                     }
                 return {

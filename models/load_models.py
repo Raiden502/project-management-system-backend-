@@ -21,6 +21,9 @@ def load_db():
             IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'file_types') THEN
                 CREATE TYPE file_types as ENUM('image', 'file');
             END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'project_status') THEN
+                CREATE TYPE project_status as ENUM('Design', 'Development', 'Testing', 'Analysis', 'Maintenance', 'Documentation', 'Iteration', 'Proto Type', 'Deployment');
+            END IF;
         END
         $$;
 
@@ -264,6 +267,42 @@ def load_db():
             CONSTRAINT comments_project_fk FOREIGN KEY (project_id) REFERENCES projects_info (project_id),
             CONSTRAINT comments_user_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id)
         );
+        
+        DO $$ 
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 
+                FROM information_schema.columns 
+                WHERE table_name = 'projects_info' AND column_name = 'avatar'
+            ) THEN
+                ALTER TABLE projects_info ADD COLUMN avatar TEXT;
+            END IF;
+
+            IF NOT EXISTS (
+                SELECT 1 
+                FROM information_schema.columns 
+                WHERE table_name = 'projects_info' AND column_name = 'status'
+            ) THEN
+                ALTER TABLE projects_info ADD COLUMN status project_status NOT NULL;
+            END IF;
+
+            IF NOT EXISTS (
+                SELECT 1 
+                FROM information_schema.columns 
+                WHERE table_name = 'projects_info' AND column_name = 'links'
+            ) THEN
+                ALTER TABLE projects_info ADD COLUMN links TEXT [];
+            END IF;
+
+            IF NOT EXISTS (
+                SELECT 1 
+                FROM information_schema.columns 
+                WHERE table_name = 'projects_info' AND column_name = 'tools'
+            ) THEN
+                ALTER TABLE projects_info ADD COLUMN tools TEXT [];
+            END IF;
+        END $$;
+
     '''
     with db.session() as session:
         session.execute(text(query_string))
