@@ -301,6 +301,14 @@ def load_db():
             ) THEN
                 ALTER TABLE projects_info ADD COLUMN tools TEXT [];
             END IF;
+
+            IF EXISTS (
+                SELECT 1 
+                FROM information_schema.columns 
+                WHERE table_name = 'teams_info' AND column_name = 'avatar'
+            ) THEN
+                ALTER TABLE teams_info ALTER COLUMN avatar TYPE TEXT;
+            END IF;
         END $$;
 
     '''
