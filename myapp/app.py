@@ -8,7 +8,7 @@ from blueprints.user_blueprint import user_blueprint
 from blueprints.dept_blueprint import dept_blueprint
 from blueprints.proj_blueprint import proj_blueprint
 from blueprints.team_blueprint import team_blueprint
-
+from blueprints.chat_blueprint import char_blueprint
 
 def create_app():
     app = Flask(__name__)
@@ -22,6 +22,7 @@ def create_app():
     app.register_blueprint(dept_blueprint, url_prefix="/dept")
     app.register_blueprint(proj_blueprint, url_prefix="/proj")
     app.register_blueprint(team_blueprint, url_prefix="/team")
+    app.register_blueprint(char_blueprint, url_prefix="/chat")
     return app
 
 if __name__ == '__main__':
