@@ -15,7 +15,7 @@ class UserChats:
                         m.message, CASE when u.user_id =:sender_id THEN 'you' ELSE u.user_name END as username,
                         u.avatar,  m.created_at AS datetime, m.group_id AS receiverid, m.sender_id AS senderid from messages m
                     join
-                    users_info u
+                    user_info u
                     on u.user_id = m.sender_id
                     WHERE
                     m.group_id = :receiver_id and m.organization_id = :org_id

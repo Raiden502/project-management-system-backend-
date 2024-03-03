@@ -18,7 +18,7 @@ class UserDetails:
                     LIMIT 1
                     ) AS lastmsg,
                     avatar 
-                from group_info where organization_id = ''
+                from group_info where organization_id = :org_id
                 union
                 select 
                     user_id as id, user_name as name, active_status as onlinestatus, 'normal' AS type,
