@@ -11,14 +11,14 @@ class UserDetails:
         try:
             user_query = f'''
                 select 
-                    group_id as id, name, False as onlinestatus, 'group' as type,
+                    g.group_id as id, g.name, False as onlinestatus, 'group' as type,
                     (
                     SELECT message FROM messages m WHERE m.group_id = group_id
                     ORDER BY m.created_at DESC
                     LIMIT 1
                     ) AS lastmsg,
                     avatar 
-                from group_info where organization_id = :org_id
+                from group_info g left join user_group_associaton ug on g.group_id = ug.group_id where g.organization_id = :org_id and ug.user_id = :user_id
                 union
                 select 
                     user_id as id, user_name as name, active_status as onlinestatus, 'normal' AS type,
