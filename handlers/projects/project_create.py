@@ -10,9 +10,10 @@ class ProjectCreate:
     def addNewProj(self):
         try:
             ids = generate_uniqueId(type=['project'])
+            ordered = [generate_uniqueId(type=['task_type'], delay=1)['task_type'] for i in range(3)]
             user_query = f'''
-                insert into projects_info (project_id, department_id, organization_id, user_id, name, description, avatar, status, tools, links)
-                values(:proj_id, :dept_id, :org_id, :user_id, :name, :description, :avatar, :status, :tools, :links);
+                insert into projects_info (project_id, department_id, organization_id, user_id, name, description, avatar, status, tools, links, task_order)
+                values(:proj_id, :dept_id, :org_id, :user_id, :name, :description, :avatar, :status, :tools, :links, :tasks);
             '''
             with db.session() as session:
                 session.execute(
@@ -28,8 +29,26 @@ class ProjectCreate:
                         "status":self.data['status'],
                         "tools": self.data['tools'],
                         "links": self.data['links'],
+                        "tasks":ordered,
                     })
                 session.commit()
+
+            for items, item_id in zip(ordered, ['To Do', 'In Progress', 'Done']):
+                tasktype_query = f'''
+                    insert into task_types (type_id, project_id, department_id, name, created_by)
+                    values(:type_id, :proj_id, :dept_id,  :name, :user_id);
+                '''
+                with db.session() as session:
+                    session.execute(
+                        text(tasktype_query),
+                        {
+                            "type_id":items,
+                            "proj_id":ids.get('project'),
+                            "dept_id":self.data['dept_id'],
+                            "name":item_id, 
+                            "user_id": self.data['user_id'],
+                        })
+                    session.commit()
 
             for user in self.data['users']:
                 ids_dept = generate_uniqueId(type=['project_user'])

@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import List
+from time import sleep
 
-def generate_uniqueId(type:List[str])->str:
+def generate_uniqueId(type:List[str], delay = 0)->str:
     config = {
         'organization':'O',
         'user':'U',
@@ -25,5 +26,6 @@ def generate_uniqueId(type:List[str])->str:
     temp={}
     for item in type:
         temp[item] = f'{config.get(item)}_{timestamp}'
+        sleep(delay)
     
     return temp

@@ -281,6 +281,14 @@ def load_db():
             ) THEN
                 ALTER TABLE user_info ADD COLUMN active_status BOOLEAN DEFAULT FALSE;
             END IF;
+
+            IF NOT EXISTS (
+                SELECT 1 
+                FROM information_schema.columns 
+                WHERE table_name = 'projects_info' AND column_name = 'task_order'
+            ) THEN
+                ALTER TABLE projects_info ADD COLUMN task_order VARCHAR(255) [];
+            END IF;
         END $$;
     '''
     with db.session() as session:
