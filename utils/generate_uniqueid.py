@@ -22,9 +22,9 @@ def generate_uniqueId(type:List[str], delay = 0)->str:
         'team_user':'TEU',
         'file':'F'
     }
-    timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S%f')[:-3]  # Remove microseconds
     temp={}
     for item in type:
+        timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S%f')  # Remove microseconds
         temp[item] = f'{config.get(item)}_{timestamp}'
         sleep(delay)
     

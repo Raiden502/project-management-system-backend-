@@ -19,12 +19,23 @@ def create_tasks(current_app):
     response = TaskCreate(request).addNewTask()
     return jsonify(response)
 
+@task_blueprint.route("/delete_task", methods=["POST"])
+@token_required
+def delete_task(current_app):
+    response = TaskCreate(request).delete_task()
+    return jsonify(response)
+
 @task_blueprint.route("/create_column", methods=["POST"])
 @token_required
 def create_column(current_app):
     response = TaskTypeCreate(request).addNewTaskType()
     return jsonify(response)
 
+@task_blueprint.route("/delete_column", methods=["POST"])
+@token_required
+def delete_column(current_app):
+    response = TaskTypeCreate(request).delete_column()
+    return jsonify(response)
 
 @task_blueprint.route("/reorder_column", methods=["POST"])
 @token_required

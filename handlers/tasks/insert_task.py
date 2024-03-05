@@ -42,3 +42,26 @@ class TaskCreate:
         except Exception as e:
             print(e)
             return {"status": False, "message": "failed to register", "errorcode": 2}
+        
+    def delete_task(self):
+        try:
+            task_query = f'''
+                delete from tasks where project_id  =:proj_id and department_id =:dept_id and task_id =:task_id
+            '''
+            with db.session() as session:
+                session.execute(
+                    text(task_query),
+                    {
+                        "task_id": self.data['taskId'],
+                        "proj_id":self.data['proj_id'],
+                        "dept_id":self.data['dept_id'],
+                    })
+                session.commit()
+            return {
+                "status": True,
+                "message": "registered successful",
+                "errorcode": 0,
+            }
+        except Exception as e:
+            print(e)
+            return {"status": False, "message": "failed to register", "errorcode": 2}

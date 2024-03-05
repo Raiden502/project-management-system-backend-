@@ -61,3 +61,62 @@ class TaskTypeCreate:
         except Exception as e:
             print(e)
             return {"status": False, "message": "failed to register", "errorcode": 2}
+        
+    
+    def delete_column(self):
+        try:
+            task_query = f'''
+                delete from tasks where type_id  =:type_id and project_id = :proj_id
+            '''
+            with db.session() as session:
+                session.execute(
+                    text(task_query),
+                    {
+                        "type_id": self.data['type_id'],
+                        "proj_id":self.data["proj_id"]
+                    })
+                session.commit()
+
+            type_query = f'''
+                delete from task_types where type_id  =:type_id and project_id = :proj_id
+            '''
+            with db.session() as session:
+                session.execute(
+                    text(type_query),
+                    {
+                        "type_id": self.data['type_id'],
+                        "proj_id":self.data["proj_id"]
+                    })
+                session.commit()
+
+            order_list = f'''
+                select task_order from projects_info where project_id = :proj_id
+            '''
+            result = db.session.execute(
+                text(order_list),
+                {
+                    "proj_id":self.data['proj_id'],
+                }).fetchone()
+            
+            update_query = f'''
+                update projects_info set task_order = :orderlist where project_id = :proj_id
+            '''
+
+            list_data = list(result[0])
+            list_data.remove(self.data['type_id'])
+            db.session.execute(
+                text(update_query),
+                {
+                    "orderlist":list_data,
+                    "proj_id":self.data['proj_id'],
+                })
+            db.session.commit()
+
+            return {
+                "status": True,
+                "message": "registered successful",
+                "errorcode": 0,
+            }
+        except Exception as e:
+            print(e)
+            return {"status": False, "message": "failed to register", "errorcode": 2}
