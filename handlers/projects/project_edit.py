@@ -64,6 +64,12 @@ class EditProject:
 
             for user in users_to_remove:
                 delete_query = f'''
+                    DELETE FROM task_user_association
+                    USING tasks t
+                    WHERE t.task_id = task_user_association.task_id
+                    AND t.project_id = :project_id
+                    AND task_user_association.user_id = :user_id;
+
                     DELETE FROM project_user_association
                     WHERE user_id = :user_id AND project_id = :project_id
                 '''
@@ -94,6 +100,12 @@ class EditProject:
 
             for team in teams_to_remove:
                 delete_query = f'''
+                    DELETE FROM task_user_association
+                    USING tasks t
+                    WHERE t.task_id = task_user_association.task_id
+                    AND t.project_id = :project_id
+                    AND task_user_association.team_id = :team_id;
+
                     DELETE FROM project_user_association
                     WHERE team_id = :team_id AND project_id = :project_id
                 '''

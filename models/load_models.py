@@ -289,6 +289,14 @@ def load_db():
             ) THEN
                 ALTER TABLE projects_info ADD COLUMN task_order VARCHAR(255) [];
             END IF;
+
+            IF NOT EXISTS (
+                SELECT 1 
+                FROM information_schema.columns 
+                WHERE table_name = 'tasks' AND column_name = 'start_date'
+            ) THEN
+                ALTER TABLE tasks ADD COLUMN start_date TIMESTAMP;
+            END IF;
         END $$;
     '''
     with db.session() as session:

@@ -5,6 +5,7 @@ from handlers.teams.team_contact_list import UserTeamList
 from handlers.teams.team_create import TeamCreate
 from handlers.teams.team_edit import EditTeams
 from handlers.teams.team_formdata import TeamEditDetails
+from handlers.teams.teams_delete import DeleteTeams
 from middleware.token_middleware import token_required
 
 team_blueprint = Blueprint("team_blueprint", __name__)
@@ -44,4 +45,10 @@ def team_edit(current_app):
 @token_required
 def team_formdetails(current_app):
     response = TeamEditDetails(request).get_form_details()
+    return jsonify(response)
+
+@team_blueprint.route("/team_delete", methods=["POST"])
+@token_required
+def team_delete(current_app):
+    response = DeleteTeams(request).delete()
     return jsonify(response)

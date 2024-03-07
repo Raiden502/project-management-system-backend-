@@ -66,23 +66,19 @@ class TaskTypeCreate:
     def delete_column(self):
         try:
             task_query = f'''
-                delete from tasks where type_id  =:type_id and project_id = :proj_id
+                DELETE FROM task_user_association
+                USING tasks t
+                WHERE t.task_id = task_user_association.task_id
+                AND t.project_id = :proj_id
+                AND t.type_id = :type_id;
+
+                delete from tasks where type_id  =:type_id and project_id = :proj_id;
+
+                delete from task_types where type_id  =:type_id and project_id = :proj_id;
             '''
             with db.session() as session:
                 session.execute(
                     text(task_query),
-                    {
-                        "type_id": self.data['type_id'],
-                        "proj_id":self.data["proj_id"]
-                    })
-                session.commit()
-
-            type_query = f'''
-                delete from task_types where type_id  =:type_id and project_id = :proj_id
-            '''
-            with db.session() as session:
-                session.execute(
-                    text(type_query),
                     {
                         "type_id": self.data['type_id'],
                         "proj_id":self.data["proj_id"]
@@ -111,6 +107,35 @@ class TaskTypeCreate:
                     "proj_id":self.data['proj_id'],
                 })
             db.session.commit()
+
+            return {
+                "status": True,
+                "message": "registered successful",
+                "errorcode": 0,
+            }
+        except Exception as e:
+            print(e)
+            return {"status": False, "message": "failed to register", "errorcode": 2}
+        
+    def updateColumnTasks(self):
+        try:
+
+            for key, value in self.data.items():
+                if(len(value['taskIds']) == 0):
+                    continue
+                
+                task_query = f'''
+                    update tasks
+                    set type_id = :type_id
+                    where task_id in :task_id
+                '''
+                db.session.execute(
+                    text(task_query),
+                    {
+                        "type_id": key,
+                        "task_id": tuple( item for item in value['taskIds'])
+                    })
+                db.session.commit()
 
             return {
                 "status": True,

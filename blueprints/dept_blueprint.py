@@ -6,6 +6,7 @@ from handlers.departments.department_create import CreateDept
 from handlers.departments.department_edit import EditDept
 from handlers.departments.get_team_user import TeamUserDeptList
 from handlers.departments.department_details_edit import DepartmentEditDetails
+from handlers.departments.department_delete import DeleteDepartment
 from middleware.token_middleware import token_required
 
 dept_blueprint = Blueprint("dept_blueprint", __name__)
@@ -50,4 +51,10 @@ def get_user_team_list(current_app):
 @token_required
 def get_dept_editdetails(current_app):
     response = DepartmentEditDetails(request).get_dept_details()
+    return jsonify(response)
+
+@dept_blueprint.route("/dept_delete", methods=["POST"])
+@token_required
+def dept_delete(current_app):
+    response = DeleteDepartment(request).delete()
     return jsonify(response)

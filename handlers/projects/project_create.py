@@ -51,7 +51,7 @@ class ProjectCreate:
                     session.commit()
 
             for user in self.data['users']:
-                ids_dept = generate_uniqueId(type=['project_user'])
+                ids_dept = generate_uniqueId(type=['project_user'], delay=0.2)
                 dept_user_ads_query = f'''
                     insert into project_user_association (relation_id, project_id,  user_id, department_id )
                     values(:rel_id, :proj_id, :user_id, :dept_id);
@@ -68,7 +68,7 @@ class ProjectCreate:
                     session.commit()
 
             for team in self.data['teams']:
-                ids_dept = generate_uniqueId(type=['project_user'])
+                ids_dept = generate_uniqueId(type=['project_user'], delay=0.2)
                 dept_user_ads_query = f'''
                     insert into project_user_association (relation_id, project_id, team_id, department_id )
                     values(:rel_id, :proj_id, :team_id, :dept_id);

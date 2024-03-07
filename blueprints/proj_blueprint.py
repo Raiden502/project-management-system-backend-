@@ -5,6 +5,7 @@ from handlers.projects.project_contact_list import TeamUserProjList
 from handlers.projects.project_create import ProjectCreate
 from handlers.projects.project_edit import EditProject
 from handlers.projects.project_edit_details import ProjectEditDetails
+from handlers.projects.project_delete import DeleteProject
 from middleware.token_middleware import token_required
 
 proj_blueprint = Blueprint("proj_blueprint", __name__)
@@ -45,4 +46,10 @@ def proj_edit(current_app):
 @token_required
 def get_proj_editform(current_app):
     response = ProjectEditDetails(request).get_proj_details()
+    return jsonify(response)
+
+@proj_blueprint.route("/proj_delete", methods=["POST"])
+@token_required
+def proj_delete(current_app):
+    response = DeleteProject(request).delete()
     return jsonify(response)

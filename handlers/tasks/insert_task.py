@@ -45,8 +45,10 @@ class TaskCreate:
         
     def delete_task(self):
         try:
+
             task_query = f'''
-                delete from tasks where project_id  =:proj_id and department_id =:dept_id and task_id =:task_id
+                delete from task_user_association where project_id  =:proj_id and task_id =:task_id;
+                delete from tasks where project_id  =:proj_id and department_id =:dept_id and task_id =:task_id;
             '''
             with db.session() as session:
                 session.execute(
