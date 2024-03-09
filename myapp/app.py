@@ -10,6 +10,7 @@ from blueprints.proj_blueprint import proj_blueprint
 from blueprints.team_blueprint import team_blueprint
 from blueprints.chat_blueprint import char_blueprint
 from blueprints.task_blueprint import task_blueprint
+from blueprints.dashboard_blueprint import dash_blueprint
 
 def create_app():
     app = Flask(__name__)
@@ -25,6 +26,7 @@ def create_app():
     app.register_blueprint(team_blueprint, url_prefix="/team")
     app.register_blueprint(char_blueprint, url_prefix="/chat")
     app.register_blueprint(task_blueprint, url_prefix="/tasks")
+    app.register_blueprint(dash_blueprint, url_prefix="/dashboard")
     return app
 
 if __name__ == '__main__':
