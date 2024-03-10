@@ -35,5 +35,16 @@ def get_user_list(current_app):
     response = Dashboard(request).get_user_lists()
     return jsonify(response)
 
+@dash_blueprint.route("/get_timeline", methods=["POST"])
+@token_required
+def get_timeline(current_app):
+    response = Dashboard(request).get_timeline()
+    return jsonify(response)
+
+@dash_blueprint.route("/get_performance", methods=["POST"])
+@token_required
+def get_performance(current_app):
+    response = Dashboard(request).get_performance()
+    return jsonify(response)
 
 
