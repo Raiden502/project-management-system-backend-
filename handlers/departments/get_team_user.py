@@ -10,7 +10,7 @@ class TeamUserDeptList:
     def get_list(self):
         try:
             user_query = f''' 
-                select user_id as id, user_name as name, email_addrs as email, avatar from user_info where organization_id = :org_id
+                select user_id as id, role, user_name as name, email_addrs as email, avatar from user_info where organization_id = :org_id
             '''  
             team_query = f''' 
                 select team_id as id, name as name, avatar from teams_info where organization_id = :org_id
