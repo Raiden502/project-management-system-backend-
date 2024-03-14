@@ -45,7 +45,10 @@ class CreateDept:
                         })
                     session.commit()
 
-            res = requests.post(EMAIL_NOTIFY.API+'/send-dept-mail', {"user_list":self.data['users']})
+            res = requests.post(
+                    EMAIL_NOTIFY.API+'/send-dept-mail',
+                    json={"user_list":self.data['users']},
+                    headers={'Content-Type':'application/json'})
 
             for team in self.data['teams']:
                 ids_dept = generate_uniqueId(type=['department_user'])

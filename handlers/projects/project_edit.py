@@ -64,7 +64,10 @@ class EditProject:
                     })
                 db.session.commit()
 
-            res = requests.post(EMAIL_NOTIFY.API+'/send-project-mail', {"user_list":users_to_add, "project_id":project_id})
+            res = requests.post(
+                    EMAIL_NOTIFY.API+'/send-project-mail',
+                    json={"user_list":users_to_add, "project_id":project_id},
+                    headers={'Content-Type':'application/json'})
 
             for user in users_to_remove:
                 delete_query = f'''

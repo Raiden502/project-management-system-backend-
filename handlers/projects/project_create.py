@@ -70,7 +70,10 @@ class ProjectCreate:
                         })
                     session.commit()
 
-            res = requests.post(EMAIL_NOTIFY.API+'/send-project-mail', {"user_list":self.data['users'], "project_id":ids.get('project')})
+            res = requests.post(
+                    EMAIL_NOTIFY.API+'/send-project-mail', 
+                    json={"user_list":self.data['users'], "project_id":ids.get('project')},  
+                    headers={'Content-Type':'application/json'})
 
             for team in self.data['teams']:
                 ids_dept = generate_uniqueId(type=['project_user'], delay=0.2)

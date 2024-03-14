@@ -66,7 +66,10 @@ class EditTask:
                         "task_id": task_id
                     })
                 db.session.commit()
-            res = requests.post(EMAIL_NOTIFY.API+'/send-task-mail', {"user_list":users_to_add, "project_id":project_id, "task_id":task_id})
+            res = requests.post(
+                    EMAIL_NOTIFY.API+'/send-task-mail',
+                    json={"user_list":users_to_add, "project_id":project_id, "task_id":task_id}, 
+                    headers={'Content-Type':'application/json'})
             for user in users_to_remove:
                 delete_query = f'''
                     DELETE FROM task_user_association

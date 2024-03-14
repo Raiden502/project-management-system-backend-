@@ -56,10 +56,11 @@ class EditDept:
                         "rel_id": relation_id.get('department_user'),
                     })
                 db.session.commit()
-
-            res = requests.post(EMAIL_NOTIFY.API+'/send-dept-mail', {"user_list":users_to_add})
-            
-
+            print(users_to_add)
+            res = requests.post(
+                EMAIL_NOTIFY.API+'/send-dept-mail',
+                json={"user_list":users_to_add}, 
+                headers={'Content-Type':'application/json'})
             for user in users_to_remove:
                 delete_query = f'''
 
