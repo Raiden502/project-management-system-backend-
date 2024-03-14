@@ -38,3 +38,32 @@ class UserEditDetails:
                     "message": "query unsuccessful",
                     "errorcode": 2,
                 }
+    
+    def update_password(self):
+        try:
+            user_query = f'''
+                UPDATE user_info
+                SET user_password = :password, verified = :verified
+                WHERE user_id= :user_id;
+            '''    
+            with db.session() as session:
+                session.execute(
+                    text(user_query), 
+                    {
+                        "password":self.data["confirm"],
+                        "user_id":self.data["user_id"],
+                        "verified":True
+                    })
+                session.commit()
+                return {
+                    "status": True,
+                    "message": "query successful",
+                    "errorcode": 0,
+                }
+        except Exception as e:
+            print(e)
+            return {
+                    "status": False,
+                    "message": "query unsuccessful",
+                    "errorcode": 2,
+                }

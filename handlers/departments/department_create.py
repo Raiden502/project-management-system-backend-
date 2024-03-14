@@ -1,8 +1,8 @@
 from sqlalchemy import text
 from myapp.db import db
 from utils.generate_uniqueid import generate_uniqueId
-from utils.jwt_token import generate_token
-from utils.generate_rand_pass import generate_password
+from myapp.config import EMAIL_NOTIFY
+import requests
 
 class CreateDept:
     def __init__(self, request):
@@ -44,6 +44,8 @@ class CreateDept:
                             "rel_id":ids_dept.get('department_user'),
                         })
                     session.commit()
+
+            res = requests.post(EMAIL_NOTIFY.API+'/send-dept-mail', {"user_list":self.data['users']})
 
             for team in self.data['teams']:
                 ids_dept = generate_uniqueId(type=['department_user'])

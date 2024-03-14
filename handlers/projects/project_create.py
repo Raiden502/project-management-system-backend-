@@ -1,6 +1,8 @@
 from sqlalchemy import text
 from myapp.db import db
 from utils.generate_uniqueid import generate_uniqueId
+import requests
+from myapp.config import EMAIL_NOTIFY
 
 class ProjectCreate:
     def __init__(self, request):
@@ -10,7 +12,7 @@ class ProjectCreate:
     def addNewProj(self):
         try:
             ids = generate_uniqueId(type=['project'])
-            ordered = [generate_uniqueId(type=['task_type'], delay=1)['task_type'] for i in range(3)]
+            ordered = [generate_uniqueId(type=['task_type'], delay=0.4)['task_type'] for i in range(3)]
             user_query = f'''
                 insert into projects_info (project_id, department_id, organization_id, user_id, name, description, avatar, status, tools, links, task_order)
                 values(:proj_id, :dept_id, :org_id, :user_id, :name, :description, :avatar, :status, :tools, :links, :tasks);
@@ -32,6 +34,7 @@ class ProjectCreate:
                         "tasks":ordered,
                     })
                 session.commit()
+            
 
             for items, item_id in zip(ordered, ['To Do', 'In Progress', 'Done']):
                 tasktype_query = f'''
@@ -66,6 +69,8 @@ class ProjectCreate:
                             "rel_id":ids_dept.get('project_user'),
                         })
                     session.commit()
+
+            res = requests.post(EMAIL_NOTIFY.API+'/send-project-mail', {"user_list":self.data['users'], "project_id":ids.get('project')})
 
             for team in self.data['teams']:
                 ids_dept = generate_uniqueId(type=['project_user'], delay=0.2)

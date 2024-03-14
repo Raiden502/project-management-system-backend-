@@ -1,8 +1,10 @@
 from sqlalchemy import text
 from myapp.db import db
+from myapp.config import EMAIL_NOTIFY
 from utils.generate_uniqueid import generate_uniqueId
 from utils.jwt_token import generate_token
 from utils.generate_rand_pass import generate_password
+import requests
 
 class CreateUser:
     def __init__(self, request):
@@ -32,6 +34,9 @@ class CreateUser:
                     })
                 session.commit()
 
+                res = requests.post(EMAIL_NOTIFY.API+'/send-user-password', {"user_id":ids.get('user')})
+                
+
             for dept in self.data['departments']:
                 ids_dept = generate_uniqueId(type=['department_user'])
                 dept_user_ads_query = f'''
@@ -47,6 +52,7 @@ class CreateUser:
                             "rel_id":ids_dept.get('department_user'),
                         })
                     session.commit()
+                    res = requests.post(EMAIL_NOTIFY.API+'/send-dept-mail', {"user_list":[ids.get('user')]})
 
             return {
                 "status": True,

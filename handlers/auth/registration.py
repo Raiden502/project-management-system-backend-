@@ -1,7 +1,9 @@
 from sqlalchemy import text
 from myapp.db import db
+from myapp.config import EMAIL_NOTIFY
 from utils.generate_uniqueid import generate_uniqueId
 from utils.jwt_token import generate_token
+import requests
 
 class Registration:
     def __init__(self, request):
@@ -16,8 +18,8 @@ class Registration:
                 insert into organization (organization_id, name, description)
                 values(:org_id, :org_name, :org_desc);
 
-                insert into user_info (user_id, organization_id, user_name, user_password, email_addrs, role)
-                values(:user_id, :org_id, :username, :password, :email, :role);
+                insert into user_info (user_id, organization_id, user_name, user_password, email_addrs, role, verified)
+                values(:user_id, :org_id, :username, :password, :email, :role, :verified);
 
                 insert into department_info (department_id, organization_id, user_id, name, description)
                 values(:dept_id, :org_id, :user_id, :dept_name, :dept_desc);
@@ -40,9 +42,11 @@ class Registration:
                         "email":self.data["email"],
                         "role":"super_admin",
                         "dept_name":self.data["dept_name"],
-                        "dept_desc":self.data["dept_desc"]
+                        "dept_desc":self.data["dept_desc"],
+                        "verified":True
                     })
                 session.commit()
+                res = requests.post(EMAIL_NOTIFY.API+'/new-organization', {"user_id":ids.get('user')})
             
 
             return {

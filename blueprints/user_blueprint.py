@@ -30,3 +30,8 @@ def edit_user_details(current_app):
 def create_user(current_app):
     response = CreateUser(request).addNewUser()
     return jsonify(response)
+
+@user_blueprint.route("/update_password", methods=["POST"])
+def update_password():
+    response = UserEditDetails(request).update_password()
+    return jsonify(response)
