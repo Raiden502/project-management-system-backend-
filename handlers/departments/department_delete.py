@@ -32,9 +32,6 @@ class DeleteDepartment:
                 DELETE FROM projects_info
                 WHERE department_id = :dept_id;
 
-                DELETE FROM teams_info
-                WHERE department_id = :dept_id;
-
                 DELETE FROM department_info
                 WHERE department_id = :dept_id;
                 
