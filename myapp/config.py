@@ -15,7 +15,7 @@ def get_env_variable(name):
 @dataclass
 class ApplicationConfig(object):
     DB_TRACK_MODIFICATIONS = False
-    DATABASE_URI: str = 'postgresql://postgres:system@localhost:5432/collab-pre-1'
+    DATABASE_URI: str = 'postgresql://postgres:admin@localhost:5432/collab-pre-1'
 
 @dataclass
 class JWtConfig(object):

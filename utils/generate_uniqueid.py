@@ -24,7 +24,7 @@ def generate_uniqueId(type:List[str], delay = 0)->str:
     }
     temp={}
     for item in type:
-        timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S%f')  # Remove microseconds
+        timestamp = str(datetime.now().timestamp()).replace('.', '')
         temp[item] = f'{config.get(item)}_{timestamp}'
         sleep(delay)
     

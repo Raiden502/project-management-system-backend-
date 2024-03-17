@@ -1,8 +1,7 @@
 from sqlalchemy import text
 from myapp.db import db
 from utils.generate_uniqueid import generate_uniqueId
-from myapp.config import EMAIL_NOTIFY
-import requests
+from utils.email_notify import notify_mail
 
 class CreateDept:
     def __init__(self, request):
@@ -45,10 +44,6 @@ class CreateDept:
                         })
                     session.commit()
 
-            res = requests.post(
-                    EMAIL_NOTIFY.API+'/send-dept-mail',
-                    json={"user_list":self.data['users']},
-                    headers={'Content-Type':'application/json'})
 
             for team in self.data['teams']:
                 ids_dept = generate_uniqueId(type=['department_user'])
@@ -67,6 +62,7 @@ class CreateDept:
                     session.commit()
 
 
+            notify_mail('/send-dept-mail',{"user_list":self.data['users']})
             return {
                 "status": True,
                 "message": "registered successful",

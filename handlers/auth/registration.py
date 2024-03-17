@@ -1,9 +1,8 @@
 from sqlalchemy import text
 from myapp.db import db
-from myapp.config import EMAIL_NOTIFY
 from utils.generate_uniqueid import generate_uniqueId
 from utils.jwt_token import generate_token
-import requests
+from utils.email_notify import notify_mail
 
 class Registration:
     def __init__(self, request):
@@ -46,9 +45,7 @@ class Registration:
                         "verified":True
                     })
                 session.commit()
-                res = requests.post(EMAIL_NOTIFY.API+'/new-organization', {"user_id":ids.get('user')})
-            
-
+                notify_mail('/new-organization', {"user_id":ids.get('user')})
             return {
                 "status": True,
                 "message": "registered successful",

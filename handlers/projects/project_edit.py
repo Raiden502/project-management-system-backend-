@@ -1,8 +1,7 @@
 from sqlalchemy import text
 from myapp.db import db
 from utils.generate_uniqueid import generate_uniqueId
-import requests
-from myapp.config import EMAIL_NOTIFY
+from utils.email_notify import notify_mail
 
 class EditProject:
     def __init__(self, request):
@@ -64,10 +63,6 @@ class EditProject:
                     })
                 db.session.commit()
 
-            res = requests.post(
-                    EMAIL_NOTIFY.API+'/send-project-mail',
-                    json={"user_list":users_to_add, "project_id":project_id},
-                    headers={'Content-Type':'application/json'})
 
             for user in users_to_remove:
                 delete_query = f'''
@@ -123,6 +118,7 @@ class EditProject:
                     })
                     session.commit()
 
+            notify_mail('/send-project-mail',{"user_list":users_to_add, "project_id":project_id})
             return {"status": True, "message": "registered successful", "errorcode": 0}
         except Exception as e:
             print(e)

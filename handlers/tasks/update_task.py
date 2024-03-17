@@ -1,8 +1,7 @@
 from sqlalchemy import text
 from myapp.db import db
 from utils.generate_uniqueid import generate_uniqueId
-import requests
-from myapp.config import EMAIL_NOTIFY
+from utils.email_notify import notify_mail
 
 class EditTask:
     def __init__(self, request):
@@ -53,7 +52,7 @@ class EditTask:
             users_to_remove = [user for user in existing_users if user not in self.data['users']]
 
             for user in users_to_add:
-                relation_id = generate_uniqueId(type=['task_users'], delay=0.1)
+                relation_id = generate_uniqueId(type=['task_users'])
                 insert_query = f'''
                     INSERT INTO task_user_association (relation_id, user_id, project_id, task_id)
                     VALUES (:rel_id, :user_id, :project_id, :task_id)
@@ -66,10 +65,6 @@ class EditTask:
                         "task_id": task_id
                     })
                 db.session.commit()
-            res = requests.post(
-                    EMAIL_NOTIFY.API+'/send-task-mail',
-                    json={"user_list":users_to_add, "project_id":project_id, "task_id":task_id}, 
-                    headers={'Content-Type':'application/json'})
             for user in users_to_remove:
                 delete_query = f'''
                     DELETE FROM task_user_association
@@ -88,7 +83,7 @@ class EditTask:
             teams_to_remove = [team for team in existing_teams if team not in self.data['teams']]
 
             for team in teams_to_add:
-                relation_id = generate_uniqueId(type=['task_users'], delay=0.1)
+                relation_id = generate_uniqueId(type=['task_users'])
                 insert_query = f'''
                     INSERT INTO task_user_association (relation_id, team_id, project_id, task_id)
                     VALUES (:rel_id, :team_id, :project_id, :task_id)
@@ -114,6 +109,7 @@ class EditTask:
                     })
                     session.commit()
 
+            notify_mail('/send-task-mail',{"user_list":users_to_add, "project_id":project_id, "task_id":task_id})
             return {"status": True, "message": "registered successful", "errorcode": 0}
         except Exception as e:
             print(e)
