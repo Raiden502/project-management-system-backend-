@@ -109,6 +109,49 @@ class EditTask:
                     })
                     session.commit()
 
+
+            # attachments            
+            list_query = f'''
+                SELECT
+                    array_agg(relation_id) FILTER (WHERE relation_id IS NOT NULL) AS id
+                FROM task_files_associaton
+                WHERE task_id =:task_id
+            '''
+            result = db.session.execute(text(list_query), {"task_id":task_id}).fetchone()
+            existing_users = result[0] or []
+
+            check_files = [it['id'] for it in self.data['attachments'] if it['id']!='']
+
+            users_to_remove = [files for files in existing_users if files not in check_files]
+
+            print(users_to_remove, existing_users, check_files)
+
+            for item in users_to_remove:
+                delete_query = f'''
+                    DELETE FROM task_files_associaton
+                    WHERE  relation_id =:rel_id and task_id = :task_id
+                '''
+                
+                db.session.execute(text(delete_query), {
+                        "rel_id": item,
+                        "task_id":task_id,
+                    })
+                db.session.commit()
+
+            for files in self.data['attachments']:
+                if files['id']=='':
+                    relation_id = generate_uniqueId(type=['task_file'])
+                    insert_query = f'''
+                        INSERT INTO task_files_associaton (relation_id, task_id, file_src)
+                        VALUES (:rel_id, :task_id, :src)
+                    '''
+                    db.session.execute(text(insert_query), {
+                            "src":files['file'],
+                            "rel_id": relation_id.get('task_file'),
+                            "task_id": task_id
+                        })
+                    db.session.commit()
+
             notify_mail('/send-task-mail',{"user_list":users_to_add, "project_id":project_id, "task_id":task_id})
             return {"status": True, "message": "registered successful", "errorcode": 0}
         except Exception as e:

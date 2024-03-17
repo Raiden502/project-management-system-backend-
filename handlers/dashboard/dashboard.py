@@ -156,30 +156,33 @@ class Dashboard:
                 }
             
             tasks_query = f'''
-                select 
-                    t.task_id as id, 
-                    ty.type_id as typeid,
-                    t.name,
-                    t.priority, 
-                    ty.name as status,
-                    TO_CHAR(t.start_date, 'DD-MM-YYYY') AS start_date,
-                    TO_CHAR(t.due_date, 'DD-MM-YYYY') AS due_date,
-                    COUNT(DISTINCT tu.user_id) AS users,
-                    COUNT(DISTINCT tu.team_id) AS teams,
-                    COALESCE(
-                        json_build_object(
-                            'id', cu.user_id,
-                            'name', cu.user_name,
-                            'avatar', cu.avatar
-                        ),
-                        json_build_object()
-                    ) AS reporter
-                from tasks t
-                left join task_types ty on t.type_id=ty.type_id
-                left join task_user_association tu on tu.task_id = t.task_id
-                left join user_info cu on cu.user_id = t.reporter
-                where t.project_id =:project_id and t.department_id = :department_id
-                group by id, typeid, t.name, t.start_date, t.due_date,  t.priority, status, cu.user_id
+                with performance_metrics as (
+                    select 
+                        t.task_id as id, 
+                        ty.type_id as typeid,
+                        t.name,
+                        t.priority, 
+                        ty.name as status,
+                        TO_CHAR(t.start_date, 'DD-MM-YYYY') AS start_date,
+                        TO_CHAR(t.due_date, 'DD-MM-YYYY') AS due_date,
+                        COUNT(DISTINCT tu.user_id) AS users,
+                        COUNT(DISTINCT tu.team_id) AS teams,
+                        COALESCE(
+                            json_build_object(
+                                'id', cu.user_id,
+                                'name', cu.user_name,
+                                'avatar', cu.avatar
+                            ),
+                            json_build_object()
+                        ) AS reporter
+                    from tasks t
+                    left join task_types ty on t.type_id=ty.type_id
+                    left join task_user_association tu on tu.task_id = t.task_id
+                    left join user_info cu on cu.user_id = t.reporter
+                    where t.project_id =:project_id and t.department_id = :department_id
+                    group by id, typeid, t.name, t.start_date, t.due_date,  t.priority, status, cu.user_id
+                )
+                select * from performance_metrics where id is not null;
                 '''
             result = dictfetchall(
                 db.session.execute(
@@ -220,31 +223,34 @@ class Dashboard:
     def get_user_lists(self):
         try:
             user_query = f'''
-                SELECT 
-                    COALESCE(NULLIF(u.user_id, ''), NULLIF(te.user_id, '')) AS user_id,
-                    COALESCE(NULLIF(u.email_addrs, ''), NULLIF(pe.email_addrs, '')) AS email,
-                    COUNT(DISTINCT t.task_id) AS tasks,
-                    COUNT(DISTINCT CASE WHEN t.priority = 'medium' THEN t.task_id END) AS medium,
-                    COUNT(DISTINCT CASE WHEN t.priority = 'low' THEN t.task_id END) AS low,
-                    COUNT(DISTINCT CASE WHEN t.priority = 'high' THEN t.task_id END) AS high,
-                    COUNT(DISTINCT CASE WHEN ty.name = 'Done' THEN t.task_id END) AS done,
-                    COUNT(DISTINCT CASE WHEN ty.name != 'Done' THEN t.task_id END) AS inprogress,
-                    COALESCE(
-                        json_build_object(
-                            'id', COALESCE(NULLIF(u.user_id, ''), NULLIF(te.user_id, '')),
-                            'name', COALESCE(NULLIF(u.user_name, ''), NULLIF(pe.user_name, '')),
-                            'avatar', COALESCE(NULLIF(u.avatar, ''), NULLIF(pe.avatar, ''))
-                        ),
-                        json_build_object()
-                    ) AS details
-                FROM tasks t
-                LEFT JOIN task_user_association pu ON pu.task_id = t.task_id
-                LEFT JOIN task_types ty ON ty.type_id = t.type_id
-                LEFT JOIN user_info u ON pu.user_id = u.user_id
-                LEFT JOIN team_user_associaton te ON te.team_id = pu.team_id
-                LEFT JOIN user_info pe ON pe.user_id = te.user_id
-                WHERE t.project_id = :project_id
-                GROUP BY u.user_id, te.user_id, email, pe.user_name, pe.avatar;
+                with performance_metrics as (
+                    SELECT 
+                        COALESCE(NULLIF(u.user_id, ''), NULLIF(te.user_id, '')) AS user_id,
+                        COALESCE(NULLIF(u.email_addrs, ''), NULLIF(pe.email_addrs, '')) AS email,
+                        COUNT(DISTINCT t.task_id) AS tasks,
+                        COUNT(DISTINCT CASE WHEN t.priority = 'medium' THEN t.task_id END) AS medium,
+                        COUNT(DISTINCT CASE WHEN t.priority = 'low' THEN t.task_id END) AS low,
+                        COUNT(DISTINCT CASE WHEN t.priority = 'high' THEN t.task_id END) AS high,
+                        COUNT(DISTINCT CASE WHEN ty.name = 'Done' THEN t.task_id END) AS done,
+                        COUNT(DISTINCT CASE WHEN ty.name != 'Done' THEN t.task_id END) AS inprogress,
+                        COALESCE(
+                            json_build_object(
+                                'id', COALESCE(NULLIF(u.user_id, ''), NULLIF(te.user_id, '')),
+                                'name', COALESCE(NULLIF(u.user_name, ''), NULLIF(pe.user_name, '')),
+                                'avatar', COALESCE(NULLIF(u.avatar, ''), NULLIF(pe.avatar, ''))
+                            ),
+                            json_build_object()
+                        ) AS details
+                    FROM tasks t
+                    LEFT JOIN task_user_association pu ON pu.task_id = t.task_id
+                    LEFT JOIN task_types ty ON ty.type_id = t.type_id
+                    LEFT JOIN user_info u ON pu.user_id = u.user_id
+                    LEFT JOIN team_user_associaton te ON te.team_id = pu.team_id
+                    LEFT JOIN user_info pe ON pe.user_id = te.user_id
+                    WHERE t.project_id = :project_id
+                    GROUP BY u.user_id, te.user_id, email, pe.user_name, pe.avatar
+                )
+                select * from performance_metrics where user_id is not null;
                 '''
             result = dictfetchall(
                 db.session.execute(
@@ -345,6 +351,7 @@ class Dashboard:
                 )
                 SELECT *
                 FROM performance_metrics
+                where user_id is not null
                 order by tasks DESC, high DESC, done_high DESC, 
                 medium DESC, done_medium DESC, low DESC, 
                 done_low DESC, tasks_due_after desc, tasks_due_before asc

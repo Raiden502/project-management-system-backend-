@@ -27,12 +27,16 @@ class BoardDetails:
                         ARRAY[]::JSON[]) AS comments,
                     COALESCE(array_agg(tu.user_id) FILTER (WHERE tu.user_id IS NOT NULL), ARRAY[]::VARCHAR[]) AS users,
                     COALESCE(array_agg(tu.team_id) FILTER (WHERE tu.team_id IS NOT NULL), ARRAY[]::VARCHAR[]) AS teams,
-                    array[]::text[] as attachments  
+                    COALESCE(array_agg(
+                            json_build_object('id', tf.relation_id, 'file', tf.file_src)) 
+                        FILTER (WHERE  tf.relation_id IS NOT NULL),
+                        ARRAY[]::JSON[]) AS attachments
                 from tasks t
                 left join task_types ty on t.type_id=ty.type_id
                 left join task_user_association tu on tu.task_id = t.task_id
                 left join comments c on c.task_id = t.task_id
                 left join user_info cu on cu.user_id = c.user_id
+                left join task_files_associaton tf on tf.task_id = t.task_id 
                 where t.project_id = :project_id and t.department_id = :department_id
                 group by id, t.name, t.description, t.due_date, t.labels,  t.priority, status,  t.reporter
             '''    

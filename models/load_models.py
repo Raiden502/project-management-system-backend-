@@ -59,6 +59,7 @@ def load_db():
             mobile_num VARCHAR(255),
             address VARCHAR(500),
             verified BOOLEAN DEFAULT FALSE NOT NULL,
+            active_status BOOLEAN DEFAULT FALSE,
             role roles NOT NULL,
             avatar TEXT,
             chat_socket_id VARCHAR(255) UNIQUE,
@@ -141,6 +142,7 @@ def load_db():
             tools TEXT [],
             links TEXT [],
             description TEXT,
+            task_order VARCHAR(255) [],
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
             last_modified TIMESTAMP,
             task_count BIGINT DEFAULT 0,
@@ -229,6 +231,7 @@ def load_db():
             priority priorities NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
             updated_at TIMESTAMP,
+            start_date TIMESTAMP,
             due_date TIMESTAMP,
             CONSTRAINT tasks_type_fk FOREIGN KEY (type_id) REFERENCES task_types (type_id),
             CONSTRAINT tasks_project_fk FOREIGN KEY (project_id) REFERENCES projects_info (project_id),
@@ -240,10 +243,9 @@ def load_db():
         CREATE TABLE IF NOT EXISTS  task_files_associaton (
             relation_id VARCHAR(255) PRIMARY KEY,
             task_id VARCHAR(255) NOT NULL,
-            file_id VARCHAR(255) NOT NULL,
+            file_src TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-            CONSTRAINT task_files_association_task_fk FOREIGN KEY (task_id) REFERENCES tasks (task_id),
-            CONSTRAINT task_files_association_file_fk FOREIGN KEY (file_id) REFERENCES files (file_id)
+            CONSTRAINT task_files_association_task_fk FOREIGN KEY (task_id) REFERENCES tasks (task_id)
         );
 
         CREATE TABLE IF NOT EXISTS  task_user_association (
@@ -271,33 +273,6 @@ def load_db():
             CONSTRAINT comments_project_fk FOREIGN KEY (project_id) REFERENCES projects_info (project_id),
             CONSTRAINT comments_user_fk FOREIGN KEY (user_id) REFERENCES user_info (user_id)
         );
-        
-        DO $$
-        BEGIN
-            IF NOT EXISTS (
-                SELECT 1 
-                FROM information_schema.columns 
-                WHERE table_name = 'user_info' AND column_name = 'active_status'
-            ) THEN
-                ALTER TABLE user_info ADD COLUMN active_status BOOLEAN DEFAULT FALSE;
-            END IF;
-
-            IF NOT EXISTS (
-                SELECT 1 
-                FROM information_schema.columns 
-                WHERE table_name = 'projects_info' AND column_name = 'task_order'
-            ) THEN
-                ALTER TABLE projects_info ADD COLUMN task_order VARCHAR(255) [];
-            END IF;
-
-            IF NOT EXISTS (
-                SELECT 1 
-                FROM information_schema.columns 
-                WHERE table_name = 'tasks' AND column_name = 'start_date'
-            ) THEN
-                ALTER TABLE tasks ADD COLUMN start_date TIMESTAMP;
-            END IF;
-        END $$;
     '''
     with db.session() as session:
         session.execute(text(query_string))

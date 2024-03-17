@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import List
 from time import sleep
+import random
+import string
 
 def generate_uniqueId(type:List[str], delay = 0)->str:
     config = {
@@ -24,8 +26,7 @@ def generate_uniqueId(type:List[str], delay = 0)->str:
     }
     temp={}
     for item in type:
-        timestamp = str(datetime.now().timestamp()).replace('.', '')
-        temp[item] = f'{config.get(item)}_{timestamp}'
-        sleep(delay)
-    
+        timestamp = str(datetime.now().timestamp()).replace('.', '') 
+        random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        temp[item] = f'{config.get(item)}_{timestamp}{random_chars}'
     return temp
