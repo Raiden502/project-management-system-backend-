@@ -10,11 +10,16 @@ class UserDetails:
     def get_details_list(self):
         try:
             user_query = f'''
-                select 
-                    u.user_id, u.user_name, u.email_addrs, u.mobile_num, u.address, u.verified, role, avatar 
-                    from user_info u join dept_user_associaton d
-                on d.user_id = u.user_id 
-                where d.department_id = :department_id
+                SELECT 
+                    u.user_id, u.user_name, u.email_addrs, 
+                    u.mobile_num, u.address, u.verified, u.role, u.avatar,
+                    CASE WHEN d.department_id IS NULL THEN TRUE ELSE FALSE END AS unassign
+                FROM 
+                    user_info u
+                LEFT JOIN 
+                    dept_user_associaton d ON d.user_id = u.user_id
+                WHERE 
+                    d.department_id = :department_id OR d.department_id IS NULL;
             '''    
             with db.session() as session:
                 result = session.execute(
