@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS  user_info (
     mobile_num VARCHAR(255),
     address VARCHAR(500),
     verified BOOLEAN DEFAULT FALSE NOT NULL,
+    active_status BOOLEAN DEFAULT FALSE,
     role roles NOT NULL,
     avatar TEXT,
     chat_socket_id VARCHAR(255) UNIQUE,
@@ -135,6 +136,7 @@ CREATE TABLE IF NOT EXISTS  projects_info (
     tools TEXT [],
     links TEXT [],
     description TEXT,
+    task_order VARCHAR(255) [],
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     last_modified TIMESTAMP,
     task_count BIGINT DEFAULT 0,
@@ -223,6 +225,7 @@ CREATE TABLE IF NOT EXISTS  tasks (
     priority priorities NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP,
+    start_date TIMESTAMP,
     due_date TIMESTAMP,
     CONSTRAINT tasks_type_fk FOREIGN KEY (type_id) REFERENCES task_types (type_id),
     CONSTRAINT tasks_project_fk FOREIGN KEY (project_id) REFERENCES projects_info (project_id),
@@ -234,10 +237,9 @@ CREATE TABLE IF NOT EXISTS  tasks (
 CREATE TABLE IF NOT EXISTS  task_files_associaton (
     relation_id VARCHAR(255) PRIMARY KEY,
     task_id VARCHAR(255) NOT NULL,
-    file_id VARCHAR(255) NOT NULL,
+    file_src TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT task_files_association_task_fk FOREIGN KEY (task_id) REFERENCES tasks (task_id),
-    CONSTRAINT task_files_association_file_fk FOREIGN KEY (file_id) REFERENCES files (file_id)
+    CONSTRAINT task_files_association_task_fk FOREIGN KEY (task_id) REFERENCES tasks (task_id)
 );
 
 CREATE TABLE IF NOT EXISTS  task_user_association (

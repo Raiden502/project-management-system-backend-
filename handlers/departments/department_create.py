@@ -61,8 +61,15 @@ class CreateDept:
                         })
                     session.commit()
 
-
-            notify_mail('/send-dept-mail',{"user_list":self.data['users']})
+            print({
+                            "user_list":self.data['users'],
+                            "department_id":ids.get('department')
+                        })
+            notify_mail('/send-dept-mail',
+                        {
+                            "user_list":self.data['users'],
+                            "department_id":ids.get('department')
+                        })
             return {
                 "status": True,
                 "message": "registered successful",

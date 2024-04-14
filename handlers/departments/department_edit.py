@@ -122,7 +122,7 @@ class EditDept:
                     })
                     session.commit()
 
-            notify_mail('/send-dept-mail',{"user_list":users_to_add})
+            notify_mail('/send-dept-mail',{"user_list":users_to_add, "department_id":department_id})
             return {"status": True, "message": "registered successful", "errorcode": 0}
         except Exception as e:
             print(e)
